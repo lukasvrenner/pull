@@ -6,8 +6,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#define SERVER_PORT 80
-#define STR_PORT "80"
+#define SERVER_PORT "80"
 
 int http_request(int sock, const char *hostname);
 
@@ -31,7 +30,7 @@ int main(const int argc, const char **argv)
     assert(argc >= 2);
     const char *hostname = argv[1];
 
-    if (getaddrinfo(hostname, STR_PORT, &hints, &res) != 0) {
+    if (getaddrinfo(hostname, SERVER_PORT, &hints, &res) != 0) {
         fprintf(stderr, "could not find hostname %s\n", hostname);
         exit(EXIT_FAILURE);
     }
@@ -76,7 +75,7 @@ int main(const int argc, const char **argv)
 
 int http_request(const int sock, const char *hostname)
 {
-    char buf[1024] = { 0 };
+    char buf[512] = { 0 };
     const char *end = buf + sizeof(buf);
     char *str = buf;
 
