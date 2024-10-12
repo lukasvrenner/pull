@@ -8,6 +8,8 @@
 
 #define SERVER_PORT "80"
 
+int tcp_connect(const char *hostname);
+
 int http_request(int sock, const char *hostname);
 
 int main(const int argc, const char **argv)
@@ -17,18 +19,34 @@ int main(const int argc, const char **argv)
         exit(EXIT_FAILURE);
     }
 
-    struct addrinfo hints, *res, *ip_addr;
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-
-    int sock;
-
     char buf[1024] = { 0 };
 
     assert(argc >= 2);
     const char *hostname = argv[1];
+
+    int sock = tcp_connect(hostname);
+
+    if (http_request(sock, hostname) == -1) {
+        fprintf(stderr, "hostname %s is too long\n", hostname);
+    }
+
+    int recieved_len = recv(sock, &buf, sizeof(buf), 0);
+
+    if (recieved_len == -1) {
+        perror("failed to recieve");
+        close(sock);
+        exit(EXIT_FAILURE);
+    }
+    printf("%s\n", buf);
+    close(sock);
+}
+
+int tcp_connect(const char *hostname)
+{
+    int sock;
+    struct addrinfo hints = { 0 }, *res, *ip_addr;
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
 
     if (getaddrinfo(hostname, SERVER_PORT, &hints, &res) != 0) {
         fprintf(stderr, "could not find hostname %s\n", hostname);
@@ -55,22 +73,11 @@ int main(const int argc, const char **argv)
         fprintf(stderr,
                 "could not find an IP address with hostname %s\n",
                 hostname);
+        exit(EXIT_FAILURE);
     }
 
     freeaddrinfo(res);
-
-    if (http_request(sock, hostname) == -1) {
-        fprintf(stderr, "hostname %s is too long\n", hostname);
-    }
-
-    int recieved_len = recv(sock, &buf, sizeof(buf), 0);
-
-    if (recieved_len == -1) {
-        perror("failed to recieve");
-        close(sock);
-        exit(EXIT_FAILURE);
-    }
-    printf("%s\n", buf);
+    return sock;
 }
 
 int http_request(const int sock, const char *hostname)
