@@ -2,7 +2,6 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -33,7 +32,7 @@ int main(const int argc, const char **argv)
     int recieved_len = recv(sock, &buf, sizeof(buf), 0);
 
     if (recieved_len == -1) {
-        perror("failed to recieve");
+        perror("could not recieve data");
         close(sock);
         exit(EXIT_FAILURE);
     }
@@ -57,12 +56,12 @@ int tcp_connect(const char *hostname)
         sock = socket(
             ip_addr->ai_family, ip_addr->ai_socktype, ip_addr->ai_protocol);
         if (sock == -1) {
-            perror("Socket creation failed");
+            perror("could not create a socket");
             continue;
         }
 
         if (connect(sock, ip_addr->ai_addr, ip_addr->ai_addrlen) == -1) {
-            perror("connection failed");
+            perror("could not create a connection");
             close(sock);
             continue;
         }
@@ -88,7 +87,6 @@ int http_request(const int sock, const char *hostname)
 
     char *start_of_request = "GET / HTTP/1.1\r\nHost: ";
     for (; str < end && *start_of_request; str++, start_of_request++) {
-
         *str = *start_of_request;
     }
 
