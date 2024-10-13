@@ -8,7 +8,7 @@ Pull files from the internet.
 
 ### Runtime dependencies
 - libc
-- [turtls](https://gituhb.com/lukasvrenner/turtls)
+- [turtls](https://github.com/lukasvrenner/turtls)
 
 ## Building
 ### Debug mode
