@@ -5,4 +5,4 @@ sources = []
 subdir('src')
 
 
-executable('pull', sources)
+executable('pull', sources, install : true)
