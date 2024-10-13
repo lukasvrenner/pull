@@ -17,27 +17,22 @@ int main(const int argc, const char **argv)
         fprintf(stderr, "expected a URL\n");
         exit(EXIT_FAILURE);
     }
-
-    char buf[1024] = { 0 };
-
-    assert(argc >= 2);
     const char *hostname = argv[1];
 
     int sock = tcp_connect(hostname);
-
     if (http_request(sock, hostname) == -1) {
         fprintf(stderr, "hostname %s is too long\n", hostname);
     }
 
+    char buf[1024] = { 0 };
     int recieved_len = recv(sock, &buf, sizeof(buf), 0);
+    close(sock);
 
     if (recieved_len == -1) {
         perror("could not recieve data");
-        close(sock);
         exit(EXIT_FAILURE);
     }
     printf("%s\n", buf);
-    close(sock);
 }
 
 int tcp_connect(const char *hostname)
