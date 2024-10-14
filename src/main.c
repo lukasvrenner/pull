@@ -4,10 +4,13 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <turtls.h>
 
 #define SERVER_PORT "80"
 
 int tcp_connect(const char *hostname);
+ssize_t tcp_send(int fd, void *data, size_t n);
+ssize_t tcp_read(int fd, void *buf, size_t n);
 
 int http_request(int sock, const char *hostname);
 
@@ -25,7 +28,9 @@ int main(const int argc, const char **argv)
     }
 
     char buf[1024] = { 0 };
-    int recieved_len = recv(sock, &buf, sizeof(buf), 0);
+    // save room for a null byte at the end
+    int recieved_len = recv(sock, &buf, sizeof(buf) - 1, 0);
+    shake_hands(sock, tcp_send, tcp_read);
     close(sock);
 
     if (recieved_len == -1) {
@@ -34,6 +39,17 @@ int main(const int argc, const char **argv)
     }
     printf("%s\n", buf);
 }
+
+ssize_t tcp_send(int fd, void *data, size_t n)
+{
+    return send(fd, data, n, 0);
+}
+
+ssize_t tcp_read(int fd, void *buf, size_t n)
+{
+    return recv(fd, buf, n, 0);
+}
+
 
 int tcp_connect(const char *hostname)
 {
