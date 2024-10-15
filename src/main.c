@@ -53,7 +53,7 @@ int tcp_connect(const char *hostname)
 {
     int sock;
     struct addrinfo hints = { 0 }, *res, *ip_addr;
-    hints.ai_family = AF_INET;
+    hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
     if (getaddrinfo(hostname, "http", &hints, &res) != 0) {
