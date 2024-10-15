@@ -6,8 +6,6 @@
 #include <unistd.h>
 #include <turtls.h>
 
-#define SERVER_PORT "80"
-
 int tcp_connect(const char *hostname);
 ssize_t tcp_send(int fd, void *data, size_t n);
 ssize_t tcp_read(int fd, void *buf, size_t n);
@@ -30,7 +28,7 @@ int main(const int argc, const char **argv)
     char buf[1024] = { 0 };
     // save room for a null byte at the end
     int recieved_len = recv(sock, &buf, sizeof(buf) - 1, 0);
-    shake_hands(sock, tcp_send, tcp_read);
+    /*shake_hands(sock, tcp_send, tcp_read);*/
     close(sock);
 
     if (recieved_len == -1) {
@@ -58,7 +56,7 @@ int tcp_connect(const char *hostname)
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
 
-    if (getaddrinfo(hostname, SERVER_PORT, &hints, &res) != 0) {
+    if (getaddrinfo(hostname, "http", &hints, &res) != 0) {
         fprintf(stderr, "could not find hostname %s\n", hostname);
         exit(EXIT_FAILURE);
     }
