@@ -7,10 +7,11 @@
 #include <turtls.h>
 
 int tcp_connect(const char *hostname);
-ssize_t tcp_send(int fd, void *data, size_t n);
-ssize_t tcp_read(int fd, void *buf, size_t n);
+ssize_t tcp_send(const void *data, size_t n, const void *ctx);
+ssize_t tcp_read(void *buf, size_t n, const void *ctx);
 
 int http_request(int sock, const char *hostname);
+
 
 int main(const int argc, const char **argv)
 {
@@ -20,7 +21,14 @@ int main(const int argc, const char **argv)
     }
     const char *hostname = argv[1];
 
+
     int sock = tcp_connect(hostname);
+    struct turtls_Io io = {
+        .write_fn = tcp_send,
+        .read_fn = tcp_read,
+        .ctx = &sock,
+    };
+    shake_hands_client(io);
     if (http_request(sock, hostname) == -1) {
         fprintf(stderr, "hostname %s is too long\n", hostname);
     }
@@ -28,7 +36,6 @@ int main(const int argc, const char **argv)
     char buf[1024] = { 0 };
     // save room for a null byte at the end
     int recieved_len = recv(sock, &buf, sizeof(buf) - 1, 0);
-    /*shake_hands(sock, tcp_send, tcp_read);*/
     close(sock);
 
     if (recieved_len == -1) {
@@ -38,38 +45,38 @@ int main(const int argc, const char **argv)
     printf("%s\n", buf);
 }
 
-ssize_t tcp_send(int fd, void *data, size_t n)
+ssize_t tcp_send(const void *data, size_t n, const void *ctx)
 {
-    return send(fd, data, n, 0);
+    return send(*(int *)ctx, data, n, 0);
 }
 
-ssize_t tcp_read(int fd, void *buf, size_t n)
+ssize_t tcp_read(void *buf, size_t n, const void *ctx)
 {
-    return recv(fd, buf, n, 0);
+    return recv(*(int *)ctx, buf, n, 0);
 }
 
 
 int tcp_connect(const char *hostname)
 {
     int sock;
-    struct addrinfo hints = { 0 }, *res, *ip_addr;
+    struct addrinfo hints = { 0 }, *result, *p;
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    if (getaddrinfo(hostname, "http", &hints, &res) != 0) {
+    if (getaddrinfo(hostname, "https", &hints, &result) != 0) {
         fprintf(stderr, "could not find hostname %s\n", hostname);
         exit(EXIT_FAILURE);
     }
 
-    for (ip_addr = res; ip_addr != NULL; ip_addr = ip_addr->ai_next) {
+    for (p = result; p != NULL; p = p->ai_next) {
         sock = socket(
-            ip_addr->ai_family, ip_addr->ai_socktype, ip_addr->ai_protocol);
+            p->ai_family, p->ai_socktype, p->ai_protocol);
         if (sock == -1) {
             perror("could not create a socket");
             continue;
         }
 
-        if (connect(sock, ip_addr->ai_addr, ip_addr->ai_addrlen) == -1) {
+        if (connect(sock, p->ai_addr, p->ai_addrlen) == -1) {
             perror("could not create a connection");
             close(sock);
             continue;
@@ -77,14 +84,14 @@ int tcp_connect(const char *hostname)
 
         break;
     }
-    if (ip_addr == NULL) {
+    if (p == NULL) {
         fprintf(stderr,
                 "could not find an IP address with hostname %s\n",
                 hostname);
         exit(EXIT_FAILURE);
     }
 
-    freeaddrinfo(res);
+    freeaddrinfo(result);
     return sock;
 }
 
