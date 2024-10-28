@@ -3,12 +3,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
+#include <asm-generic/socket.h>
 #include <unistd.h>
 #include <turtls.h>
 
 int tcp_connect(const char *hostname);
 ssize_t tcp_send(const void *data, size_t n, const void *ctx);
 ssize_t tcp_read(void *buf, size_t n, const void *ctx);
+void tcp_close(const void *ctx);
 
 int http_request(int sock, const char *hostname);
 
@@ -21,11 +23,21 @@ int main(const int argc, const char **argv)
     }
     const char *hostname = argv[1];
 
-
     int sock = tcp_connect(hostname);
+
+    struct timeval timeout = {
+        .tv_sec = 10,
+        .tv_usec = 0,
+    };
+
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+        perror("setsockopt failed");
+    }
+
     struct turtls_Io io = {
         .write_fn = tcp_send,
         .read_fn = tcp_read,
+        .close_fn = tcp_close,
         .ctx = &sock,
     };
     shake_hands_client(io);
@@ -53,6 +65,10 @@ ssize_t tcp_send(const void *data, size_t n, const void *ctx)
 ssize_t tcp_read(void *buf, size_t n, const void *ctx)
 {
     return recv(*(int *)ctx, buf, n, 0);
+}
+
+void tcp_close(const void *ctx) {
+    close(*(int *) ctx);
 }
 
 
