@@ -2,14 +2,17 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/poll.h>
 #include <sys/socket.h>
 #include <asm-generic/socket.h>
 #include <unistd.h>
+#include <poll.h>
 #include <turtls.h>
 
 int tcp_connect(const char *hostname);
 ssize_t tcp_send(const void *data, size_t n, const void *ctx);
 ssize_t tcp_read(void *buf, size_t n, const void *ctx);
+int tcp_poll(const void *ctx, int timeout);
 void tcp_close(const void *ctx);
 
 int http_request(int sock, const char *hostname);
@@ -34,12 +37,19 @@ int main(const int argc, const char **argv)
         perror("setsockopt failed");
     }
 
+    struct pollfd ctx = {
+        .fd = sock,
+        .events = POLLIN,
+    };
+
     struct turtls_Io io = {
         .write_fn = tcp_send,
         .read_fn = tcp_read,
         .close_fn = tcp_close,
-        .ctx = &sock,
+        .poll_fn = tcp_poll,
+        .ctx = &ctx,
     };
+
     shake_hands_client(io);
     if (http_request(sock, hostname) == -1) {
         fprintf(stderr, "hostname %s is too long\n", hostname);
@@ -59,16 +69,20 @@ int main(const int argc, const char **argv)
 
 ssize_t tcp_send(const void *data, size_t n, const void *ctx)
 {
-    return send(*(int *)ctx, data, n, 0);
+    return send(((struct pollfd *)ctx)->fd, data, n, 0);
 }
 
 ssize_t tcp_read(void *buf, size_t n, const void *ctx)
 {
-    return recv(*(int *)ctx, buf, n, 0);
+    return recv(((struct pollfd *)ctx)->fd, buf, n, 0);
 }
 
 void tcp_close(const void *ctx) {
-    close(*(int *) ctx);
+    close(((struct pollfd *)ctx)->fd);
+}
+
+int tcp_poll(const void *ctx, int timeout) {
+    return poll((struct pollfd *)ctx, 1, timeout);
 }
 
 
