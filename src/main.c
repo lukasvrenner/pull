@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include <turtls.h>
 
@@ -57,7 +58,11 @@ ssize_t tcp_send(const void *data, size_t n, const void *ctx)
 
 ssize_t tcp_read(void *buf, size_t n, const void *ctx)
 {
-    return recv(*(int *)ctx, buf, n, 0);
+    ssize_t bytes_read = recv(*(int *)ctx, buf, n, 0);
+    if (bytes_read < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)) {
+        return 0;
+    }
+    return bytes_read;
 }
 
 void tcp_close(const void *ctx) {
