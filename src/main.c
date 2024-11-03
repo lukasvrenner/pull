@@ -32,7 +32,9 @@ int main(const int argc, const char **argv)
         .ctx = &sock,
     };
 
-    shake_hands_client(io);
+    struct turtls_Config config = turtls_generate_config();
+
+    turtls_client_handshake(io, &config);
 }
 
 ssize_t tcp_send(const void *data, size_t n, const void *ctx)
