@@ -1,7 +1,7 @@
 AlignArrayOfStructures: None
 AlignConsecutiveAssignments:
   Enabled: false
-AlignConsecutiveBitFields: 
+AlignConsecutiveBitFields:
   Enabled: false
 AllowAllArgumentsOnNextLine: true
 AllowShortBlocksOnASingleLine: Empty
@@ -31,7 +31,7 @@ BreakBeforeBraces: Custom
 BreakBeforeTernaryOperators: false
 # BreakFunctionDefinitionParameters: false
 BreakStringLiterals: true
-ColumnLimit: 80
+ColumnLimit: 100
 Cpp11BracedListStyle: false
 IncludeBlocks: Preserve
 IndentCaseBlocks: false

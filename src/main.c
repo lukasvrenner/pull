@@ -8,10 +8,10 @@
 
 #include <turtls.h>
 
-int tcp_connect(const char *hostname);
-ssize_t tcp_send(const void *data, size_t n, const void *ctx);
-ssize_t tcp_read(void *buf, size_t n, const void *ctx);
-void tcp_close(const void *ctx);
+static int tcp_connect(const char *hostname);
+static ssize_t tcp_send(const void *data, size_t n, const void *ctx);
+static ssize_t tcp_read(void *buf, size_t n, const void *ctx);
+static void tcp_close(const void *ctx);
 
 int main(const int argc, const char **argv)
 {
@@ -34,15 +34,23 @@ int main(const int argc, const char **argv)
 
     struct turtls_Config config = turtls_generate_config();
 
-    turtls_client_handshake(io, &config);
+    struct turtls_ShakeResult result = turtls_client_handshake(io, &config);
+    switch (result.tag) {
+    case TURTLS_SHAKE_RESULT_HANDSHAKE_FAILED:
+        fputs("handshake failed\n", stderr);
+        break;
+    default:
+        puts("haven't gotten here yet\n");
+        break;
+    }
 }
 
-ssize_t tcp_send(const void *data, size_t n, const void *ctx)
+static ssize_t tcp_send(const void *data, size_t n, const void *ctx)
 {
     return send(*(int *) ctx, data, n, 0);
 }
 
-ssize_t tcp_read(void *buf, size_t n, const void *ctx)
+static ssize_t tcp_read(void *buf, size_t n, const void *ctx)
 {
     ssize_t bytes_read = recv(*(int *) ctx, buf, n, 0);
     if (bytes_read < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)) {
@@ -51,9 +59,9 @@ ssize_t tcp_read(void *buf, size_t n, const void *ctx)
     return bytes_read;
 }
 
-void tcp_close(const void *ctx) { close(*(int *) ctx); }
+static void tcp_close(const void *ctx) { close(*(int *) ctx); }
 
-int tcp_connect(const char *hostname)
+static int tcp_connect(const char *hostname)
 {
     int sock;
     struct addrinfo hints = { 0 }, *result, *p;
@@ -81,9 +89,7 @@ int tcp_connect(const char *hostname)
         break;
     }
     if (p == NULL) {
-        fprintf(stderr,
-                "could not find an IP address with hostname %s\n",
-                hostname);
+        fprintf(stderr, "could not find an IP address with hostname %s\n", hostname);
         exit(EXIT_FAILURE);
     }
 
