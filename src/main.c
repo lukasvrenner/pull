@@ -3,6 +3,7 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -33,6 +34,8 @@ int main(const int argc, const char **argv)
     };
 
     struct turtls_Config config = turtls_generate_config();
+    config.extensions.server_name.name = hostname;
+    config.extensions.server_name.len = strlen(hostname);
 
     struct turtls_ShakeResult result = turtls_client_handshake(io, &config);
     switch (result.tag) {
