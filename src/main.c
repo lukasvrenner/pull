@@ -40,11 +40,14 @@ int main(const int argc, const char **argv)
         .ctx = &sock,
     };
 
+    struct turtls_State *connection_state = turtls_alloc_state();
+
     struct turtls_Config config = turtls_generate_config();
     config.extensions.server_name.name = hostname;
     config.extensions.server_name.len = strlen(hostname);
 
-    struct turtls_ShakeResult result = turtls_client_handshake(io, &config);
+    struct turtls_ShakeResult result = turtls_client_handshake(io, &config, connection_state);
+
     switch (result.tag) {
     case TURTLS_SHAKE_RESULT_HANDSHAKE_FAILED:
         fputs("handshake failed\n", stderr);
@@ -53,6 +56,8 @@ int main(const int argc, const char **argv)
         puts("haven't gotten here yet\n");
         break;
     }
+
+    turtls_free_state(connection_state);
 }
 
 static ssize_t tcp_send(const void *data, size_t n, const void *ctx)
