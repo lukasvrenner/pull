@@ -9,20 +9,27 @@
 
 #include <turtls.h>
 
-static int tcp_connect(const char *hostname);
+static int tcp_connect(const char *hostname, const char *port);
 static ssize_t tcp_send(const void *data, size_t n, const void *ctx);
 static ssize_t tcp_read(void *buf, size_t n, const void *ctx);
 static void tcp_close(const void *ctx);
 
 int main(const int argc, const char **argv)
 {
-    if (argc != 2) {
+    if (argc < 2) {
         fprintf(stderr, "expected a URL\n");
         exit(EXIT_FAILURE);
     }
     const char *hostname = argv[1];
+    const char *port;
 
-    int sock = tcp_connect(hostname);
+    if (argc >= 3) {
+        port = argv[2];
+    } else {
+        port = "https";
+    }
+
+    int sock = tcp_connect(hostname, port);
 
     fcntl(sock, F_SETFL, O_NONBLOCK);
 
@@ -64,14 +71,14 @@ static ssize_t tcp_read(void *buf, size_t n, const void *ctx)
 
 static void tcp_close(const void *ctx) { close(*(int *) ctx); }
 
-static int tcp_connect(const char *hostname)
+static int tcp_connect(const char *hostname, const char *port)
 {
     int sock;
     struct addrinfo hints = { 0 }, *result, *p;
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    if (getaddrinfo(hostname, "https", &hints, &result) != 0) {
+    if (getaddrinfo(hostname, port, &hints, &result) != 0) {
         fprintf(stderr, "could not find hostname %s\n", hostname);
         exit(EXIT_FAILURE);
     }
