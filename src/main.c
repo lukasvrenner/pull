@@ -44,13 +44,13 @@ int main(const int argc, const char **argv)
     config.extensions.server_name.name = hostname;
     config.extensions.server_name.len = strlen(hostname);
 
-    struct turtls_ShakeResult result = turtls_client_handshake(io, &config);
+    struct turtls_Connection *connection = turtls_alloc();
 
-    struct turtls_Connection *connection = NULL;
+    struct turtls_ShakeResult result = turtls_client_handshake(io, connection, &config);
 
     switch (result.tag) {
     case TURTLS_SHAKE_RESULT_OK:
-        connection = result.ok;
+        puts("handshake succeeded");
         break;
     case TURTLS_SHAKE_RESULT_HANDSHAKE_FAILED:
         fputs("handshake failed\n", stderr);
@@ -78,8 +78,8 @@ int main(const int argc, const char **argv)
         exit(EXIT_FAILURE);
         break;
     }
-
     turtls_close(connection);
+    turtls_free(connection);
 }
 
 static ssize_t tcp_send(const void *data, size_t n, const void *ctx)
