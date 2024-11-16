@@ -46,11 +46,11 @@ int main(const int argc, const char **argv)
 
     struct turtls_ShakeResult result = turtls_client_handshake(io, &config);
 
-    struct turtls_State *state = NULL;
+    struct turtls_Connection *connection = NULL;
 
     switch (result.tag) {
     case TURTLS_SHAKE_RESULT_OK:
-        state = result.ok;
+        connection = result.ok;
         break;
     case TURTLS_SHAKE_RESULT_HANDSHAKE_FAILED:
         fputs("handshake failed\n", stderr);
@@ -75,7 +75,7 @@ int main(const int argc, const char **argv)
         break;
     }
 
-    turtls_close(state);
+    turtls_close(connection);
 }
 
 static ssize_t tcp_send(const void *data, size_t n, const void *ctx)
