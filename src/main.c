@@ -46,26 +46,36 @@ int main(const int argc, const char **argv)
 
     struct turtls_ShakeResult result = turtls_client_handshake(io, &config);
 
+    struct turtls_State *state = NULL;
+
     switch (result.tag) {
     case TURTLS_SHAKE_RESULT_OK:
+        state = result.ok;
         break;
     case TURTLS_SHAKE_RESULT_HANDSHAKE_FAILED:
         fputs("handshake failed\n", stderr);
+        exit(EXIT_FAILURE);
         break;
     case TURTLS_SHAKE_RESULT_TIMEOUT:
         fputs("record timeout\n", stderr);
+        exit(EXIT_FAILURE);
         break;
     case TURTLS_SHAKE_RESULT_IO_ERROR:
         perror("io error");
+        exit(EXIT_FAILURE);
         break;
     case TURTLS_SHAKE_RESULT_RNG_ERROR:
         fputs("could not generate a secure random number\n", stderr);
+        exit(EXIT_FAILURE);
         break;
     case TURTLS_SHAKE_RESULT_RECIEVED_ALERT:
         /* TODO: stringify the alert */
         fprintf(stderr, "recieved alert: %d", result.recieved_alert);
+        exit(EXIT_FAILURE);
         break;
     }
+
+    turtls_close(state);
 }
 
 static ssize_t tcp_send(const void *data, size_t n, const void *ctx)
