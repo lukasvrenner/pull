@@ -47,11 +47,23 @@ int main(const int argc, const char **argv)
     struct turtls_ShakeResult result = turtls_client_handshake(io, &config);
 
     switch (result.tag) {
+    case TURTLS_SHAKE_RESULT_OK:
+        break;
     case TURTLS_SHAKE_RESULT_HANDSHAKE_FAILED:
         fputs("handshake failed\n", stderr);
         break;
-    default:
-        puts("haven't gotten here yet\n");
+    case TURTLS_SHAKE_RESULT_TIMEOUT:
+        fputs("record timeout\n", stderr);
+        break;
+    case TURTLS_SHAKE_RESULT_IO_ERROR:
+        perror("io error");
+        break;
+    case TURTLS_SHAKE_RESULT_RNG_ERROR:
+        fputs("could not generate a secure random number\n", stderr);
+        break;
+    case TURTLS_SHAKE_RESULT_RECIEVED_ALERT:
+        /* TODO: stringify the alert */
+        fprintf(stderr, "recieved alert: %d", result.recieved_alert);
         break;
     }
 }
