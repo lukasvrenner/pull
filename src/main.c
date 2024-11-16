@@ -56,6 +56,10 @@ int main(const int argc, const char **argv)
         fputs("handshake failed\n", stderr);
         exit(EXIT_FAILURE);
         break;
+    case TURTLS_SHAKE_RESULT_DECODE_ERROR:
+        fputs("error decoding handshake message", stderr);
+        exit(EXIT_FAILURE);
+        break;
     case TURTLS_SHAKE_RESULT_TIMEOUT:
         fputs("record timeout\n", stderr);
         exit(EXIT_FAILURE);
