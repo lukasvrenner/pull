@@ -72,9 +72,19 @@ int main(const int argc, const char **argv)
         fputs("could not generate a secure random number\n", stderr);
         exit(EXIT_FAILURE);
         break;
+    case TURTLS_SHAKE_RESULT_CONFIG_ERROR:
+        /* TODO: display the specific error once provided */
+        fputs("there was a config error\n", stderr);
+        exit(EXIT_FAILURE);
+        break;
+    case TURTLS_SHAKE_RESULT_PRIV_KEY_IS_ZERO:
+        fputs("the generated private key was zero\n", stderr);
+        exit(EXIT_FAILURE);
+        break;
+
     case TURTLS_SHAKE_RESULT_RECIEVED_ALERT:
         /* TODO: stringify the alert */
-        fprintf(stderr, "recieved alert: %d", result.recieved_alert);
+        fprintf(stderr, "received alert: %d\n", result.recieved_alert);
         exit(EXIT_FAILURE);
         break;
     }
