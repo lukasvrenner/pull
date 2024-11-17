@@ -52,14 +52,6 @@ int main(const int argc, const char **argv)
     case TURTLS_SHAKE_RESULT_OK:
         puts("handshake succeeded");
         break;
-    case TURTLS_SHAKE_RESULT_HANDSHAKE_FAILED:
-        fputs("handshake failed\n", stderr);
-        exit(EXIT_FAILURE);
-        break;
-    case TURTLS_SHAKE_RESULT_DECODE_ERROR:
-        fputs("error decoding handshake message", stderr);
-        exit(EXIT_FAILURE);
-        break;
     case TURTLS_SHAKE_RESULT_TIMEOUT:
         fputs("record timeout\n", stderr);
         exit(EXIT_FAILURE);
@@ -82,9 +74,19 @@ int main(const int argc, const char **argv)
         exit(EXIT_FAILURE);
         break;
 
-    case TURTLS_SHAKE_RESULT_RECIEVED_ALERT:
+    case TURTLS_SHAKE_RESULT_RECEIVED_ALERT:
         /* TODO: stringify the alert */
-        fprintf(stderr, "received alert: %d\n", result.recieved_alert);
+        fprintf(stderr, "received alert: %d\n", result.received_alert);
+        exit(EXIT_FAILURE);
+        break;
+    case TURTLS_SHAKE_RESULT_PEER_ERROR:
+        /* TODO: stringify the alert */
+        fprintf(stderr, "peer error: %d\n", result.received_alert);
+        exit(EXIT_FAILURE);
+        break;
+    case TURTLS_SHAKE_RESULT_RECORD_OVERFLOW:
+        /* TODO: stringify the alert */
+        fputs("peer error: record overflow\n", stderr);
         exit(EXIT_FAILURE);
         break;
     }
