@@ -79,14 +79,9 @@ int main(const int argc, const char **argv)
         fprintf(stderr, "received alert: %d\n", result.received_alert);
         exit(EXIT_FAILURE);
         break;
-    case TURTLS_SHAKE_RESULT_PEER_ERROR:
+    case TURTLS_SHAKE_RESULT_SENT_ALERT:
         /* TODO: stringify the alert */
         fprintf(stderr, "peer error: %d\n", result.received_alert);
-        exit(EXIT_FAILURE);
-        break;
-    case TURTLS_SHAKE_RESULT_RECORD_OVERFLOW:
-        /* TODO: stringify the alert */
-        fputs("peer error: record overflow\n", stderr);
         exit(EXIT_FAILURE);
         break;
     }
