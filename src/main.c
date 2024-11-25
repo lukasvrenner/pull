@@ -46,7 +46,7 @@ int main(const int argc, const char **argv)
 
     struct turtls_Connection *connection = turtls_alloc();
 
-    struct turtls_ShakeResult result = turtls_client_handshake(io, connection, &config);
+    struct turtls_ShakeResult result = turtls_connect(io, connection, &config);
 
     switch (result.tag) {
     case TURTLS_SHAKE_RESULT_OK:
