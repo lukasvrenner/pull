@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <turtls.h>
@@ -31,7 +32,17 @@ int main(const int argc, const char **argv)
 
     int sock = tcp_connect(hostname, port);
 
-    fcntl(sock, F_SETFL, O_NONBLOCK);
+    int flags = fcntl(sock, F_GETFL, 0);
+
+    if (flags < 0) {
+        perror("could not get flags");
+        exit(EXIT_FAILURE);
+    }
+
+    if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) < 0) {
+        perror("could not disable blocking");
+        exit(EXIT_FAILURE);
+    }
 
     struct turtls_Io io = {
         .write_fn = tcp_send,
@@ -41,8 +52,8 @@ int main(const int argc, const char **argv)
     };
 
     struct turtls_Config config = turtls_generate_config();
-    config.extensions.server_name.name = hostname;
-    config.extensions.server_name.len = strlen(hostname);
+    config.extensions.server_name = hostname;
+    config.extensions.server_name_len = strlen(hostname);
 
     struct turtls_Connection *connection = turtls_alloc();
 
@@ -91,14 +102,18 @@ int main(const int argc, const char **argv)
 
 static ssize_t tcp_send(const void *data, size_t n, const void *ctx)
 {
-    return send(*(int *) ctx, data, n, 0);
+    ssize_t bytes_read = send(*(int *) ctx, data, n, 0);
+    if (bytes_read < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)) {
+        bytes_read = 0;
+    }
+    return bytes_read;
 }
 
 static ssize_t tcp_read(void *buf, size_t n, const void *ctx)
 {
     ssize_t bytes_read = recv(*(int *) ctx, buf, n, 0);
     if (bytes_read < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)) {
-        return 0;
+        bytes_read = 0;
     }
     return bytes_read;
 }
