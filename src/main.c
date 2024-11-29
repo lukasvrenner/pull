@@ -87,12 +87,12 @@ int main(const int argc, const char **argv)
 
     case TURTLS_SHAKE_RESULT_RECEIVED_ALERT:
         /* TODO: stringify the alert */
-        fprintf(stderr, "received alert: %d\n", result.received_alert);
+        fprintf(stderr, "received alert: %s\n", turtls_stringify_alert(result.received_alert));
         exit(EXIT_FAILURE);
         break;
     case TURTLS_SHAKE_RESULT_SENT_ALERT:
         /* TODO: stringify the alert */
-        fprintf(stderr, "peer error: %d\n", result.received_alert);
+        fprintf(stderr, "peer error: %s\n", turtls_stringify_alert(result.received_alert));
         exit(EXIT_FAILURE);
         break;
     }
