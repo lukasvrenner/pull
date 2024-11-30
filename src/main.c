@@ -53,7 +53,9 @@ int main(const int argc, const char **argv)
 
     struct turtls_Config config = turtls_generate_config();
     config.extensions.server_name = hostname;
-    config.extensions.server_name_len = strlen(hostname);
+    const char *app_protos[] = { "h2" };
+    config.extensions.app_protos = app_protos;
+    config.extensions.app_proto_count = 1;
 
     struct turtls_Connection *connection = turtls_alloc();
 
