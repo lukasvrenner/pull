@@ -98,6 +98,9 @@ int main(const int argc, const char **argv)
         exit(EXIT_FAILURE);
         break;
     }
+
+    puts(turtls_app_proto(connection));
+
     turtls_close(connection);
     turtls_free(connection);
 }
