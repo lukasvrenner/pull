@@ -32,69 +32,52 @@ int main(const int argc, const char **argv)
 
     int sock = tcp_connect(hostname, port);
 
-    int flags = fcntl(sock, F_GETFL, 0);
-
-    if (flags < 0) {
-        perror("could not get flags");
-        exit(EXIT_FAILURE);
-    }
-
-    if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) < 0) {
-        perror("could not disable blocking");
-        exit(EXIT_FAILURE);
-    }
-
     struct turtls_Io io = {
         .write_fn = tcp_send,
         .read_fn = tcp_read,
         .close_fn = tcp_close,
         .ctx = &sock,
     };
+    struct turtls_Connection *connection = turtls_new(io);
 
-    struct turtls_Config config = turtls_generate_config();
-    config.extensions.server_name = hostname;
-    const char *app_protos[] = { "h2" };
-    config.extensions.app_protos = app_protos;
-    config.extensions.app_proto_count = 1;
+    const char app_protos[] = { 2, 'h', '2' };
+    turtls_set_app_protos(connection, app_protos, 3);
+    turtls_set_server_name(connection, hostname);
 
-    struct turtls_Connection *connection = turtls_alloc();
-
-    struct turtls_ShakeResult result = turtls_connect(io, connection, &config);
+    struct turtls_Error result = turtls_connect(connection);
 
     switch (result.tag) {
-    case TURTLS_SHAKE_RESULT_OK:
+    case TURTLS_ERROR_NONE:
         puts("handshake succeeded");
         break;
-    case TURTLS_SHAKE_RESULT_TIMEOUT:
-        fputs("record timeout\n", stderr);
+    case TURTLS_ERROR_WANT_READ:
+        fputs("read error\n", stderr);
         exit(EXIT_FAILURE);
         break;
-    case TURTLS_SHAKE_RESULT_IO_ERROR:
-        perror("io error");
+    case TURTLS_ERROR_WANT_WRITE:
+        fputs("write error\n", stderr);
         exit(EXIT_FAILURE);
         break;
-    case TURTLS_SHAKE_RESULT_RNG_ERROR:
+    case TURTLS_ERROR_RNG_ERROR:
         fputs("could not generate a secure random number\n", stderr);
         exit(EXIT_FAILURE);
         break;
-    case TURTLS_SHAKE_RESULT_CONFIG_ERROR:
-        /* TODO: display the specific error once provided */
-        fputs("there was a config error\n", stderr);
-        exit(EXIT_FAILURE);
-        break;
-    case TURTLS_SHAKE_RESULT_PRIV_KEY_IS_ZERO:
+    case TURTLS_ERROR_PRIV_KEY_IS_ZERO:
         fputs("the generated private key was zero\n", stderr);
         exit(EXIT_FAILURE);
         break;
-
-    case TURTLS_SHAKE_RESULT_RECEIVED_ALERT:
+    case TURTLS_ERROR_RECEIVED_ALERT:
         /* TODO: stringify the alert */
         fprintf(stderr, "received alert: %s\n", turtls_stringify_alert(result.received_alert));
         exit(EXIT_FAILURE);
         break;
-    case TURTLS_SHAKE_RESULT_SENT_ALERT:
+    case TURTLS_ERROR_SENT_ALERT:
         /* TODO: stringify the alert */
-        fprintf(stderr, "peer error: %s\n", turtls_stringify_alert(result.received_alert));
+        fprintf(stderr, "server error: %s\n", turtls_stringify_alert(result.received_alert));
+        exit(EXIT_FAILURE);
+        break;
+    case TURTLS_ERROR_MISSING_EXTENSIONS:
+        fputs("missing extensions\n", stderr);
         exit(EXIT_FAILURE);
         break;
     }
