@@ -11,6 +11,7 @@ static int tcp_connect(const char *hostname, const char *port);
 static ssize_t tcp_send(const void *data, size_t n, const void *ctx);
 static ssize_t tcp_read(void *buf, size_t n, const void *ctx);
 static void tcp_close(const void *ctx);
+static int tls_connect(struct TurtlsConn *tls_conn, const char *hostname);
 
 int main(const int argc, const char **argv)
 {
@@ -35,51 +36,12 @@ int main(const int argc, const char **argv)
         .close_fn = tcp_close,
         .ctx = &sock,
     };
+
     struct TurtlsConn *tls_conn = turtls_new(io);
-    struct TurtlsConfig *config = turtls_get_config(tls_conn);
 
-    const char app_protos[] = { 2, 'h', '2' };
-    config->extensions.app_protos = app_protos;
-    config->extensions.app_protos_len = sizeof(app_protos);
-
-    config->extensions.server_name = hostname;
-
-    enum TurtlsError result = turtls_connect(tls_conn);
-
-    switch (result) {
-    case TURTLS_ERROR_NONE:
-        puts("handshake succeeded");
-        break;
-    case TURTLS_ERROR_WANT_READ:
-        fputs("read error\n", stderr);
+    if (tls_connect(tls_conn, hostname) < 1) {
+        turtls_free(tls_conn);
         exit(EXIT_FAILURE);
-        break;
-    case TURTLS_ERROR_WANT_WRITE:
-        fputs("write error\n", stderr);
-        exit(EXIT_FAILURE);
-        break;
-    case TURTLS_ERROR_TLS:
-        fprintf(stderr, "tls error: %s\n", turtls_stringify_alert(turtls_get_tls_error(tls_conn)));
-        exit(EXIT_FAILURE);
-        break;
-    case TURTLS_ERROR_TLS_PEER:
-        fprintf(
-            stderr, "peer tls error: %s\n", turtls_stringify_alert(turtls_get_tls_error(tls_conn)));
-        exit(EXIT_FAILURE);
-        break;
-
-    case TURTLS_ERROR_RNG:
-        fputs("could not generate a secure random number\n", stderr);
-        exit(EXIT_FAILURE);
-        break;
-    case TURTLS_ERROR_PRIV_KEY_IS_ZERO:
-        fputs("the generated private key was zero\n", stderr);
-        exit(EXIT_FAILURE);
-        break;
-    case TURTLS_ERROR_MISSING_EXTENSIONS:
-        fputs("missing extensions\n", stderr);
-        exit(EXIT_FAILURE);
-        break;
     }
 
     puts(turtls_app_proto(tls_conn));
@@ -108,7 +70,7 @@ static int tcp_connect(const char *hostname, const char *port)
     hints.ai_socktype = SOCK_STREAM;
 
     if (getaddrinfo(hostname, port, &hints, &result) != 0) {
-        fprintf(stderr, "could not find hostname %s\n", hostname);
+        fprintf(stderr, "could not find hostname: %s\n", hostname);
         exit(EXIT_FAILURE);
     }
 
@@ -134,4 +96,46 @@ static int tcp_connect(const char *hostname, const char *port)
 
     freeaddrinfo(result);
     return sock;
+}
+
+static int tls_connect(struct TurtlsConn *tls_conn, const char *hostname)
+{
+    struct TurtlsConfig *config = turtls_get_config(tls_conn);
+
+    const char app_protos[] = { 2, 'h', '2' };
+    config->extensions.app_protos = app_protos;
+    config->extensions.app_protos_len = sizeof(app_protos);
+
+    config->extensions.server_name = hostname;
+
+    if (turtls_connect(tls_conn) < 1) {
+        switch (turtls_get_error(tls_conn)) {
+        case TURTLS_ERROR_WANT_READ:
+            fputs("read error\n", stderr);
+            break;
+        case TURTLS_ERROR_WANT_WRITE:
+            fputs("write error\n", stderr);
+            break;
+        case TURTLS_ERROR_TLS:
+            fprintf(
+                stderr, "tls error: %s\n", turtls_stringify_alert(turtls_get_tls_error(tls_conn)));
+            break;
+        case TURTLS_ERROR_TLS_PEER:
+            fprintf(stderr,
+                    "peer tls error: %s\n",
+                    turtls_stringify_alert(turtls_get_tls_error(tls_conn)));
+            break;
+        case TURTLS_ERROR_RNG:
+            fputs("could not generate a secure random number\n", stderr);
+            break;
+        case TURTLS_ERROR_PRIV_KEY_IS_ZERO:
+            fputs("the generated private key was zero\n", stderr);
+            break;
+        case TURTLS_ERROR_MISSING_EXTENSIONS:
+            fputs("missing extensions\n", stderr);
+            break;
+        }
+        return -1;
+    }
+    return 1;
 }
