@@ -32,21 +32,24 @@ int main(const int argc, const char **argv)
 
     int sock = tcp_connect(hostname, port);
 
-    struct turtls_Io io = {
+    struct TurtlsIo io = {
         .write_fn = tcp_send,
         .read_fn = tcp_read,
         .close_fn = tcp_close,
         .ctx = &sock,
     };
-    struct turtls_Connection *connection = turtls_new(io);
+    struct TurtlsConn *tls_conn = turtls_new(io);
+    struct TurtlsConfig *config = turtls_get_config(tls_conn);
 
     const char app_protos[] = { 2, 'h', '2' };
-    turtls_set_app_protos(connection, app_protos, 3);
-    turtls_set_server_name(connection, hostname);
+    config->extensions.app_protos = app_protos;
+    config->extensions.app_protos_len = sizeof(app_protos);
 
-    struct turtls_Error result = turtls_connect(connection);
+    config->extensions.server_name = hostname;
 
-    switch (result.tag) {
+    enum TurtlsError result = turtls_connect(tls_conn);
+
+    switch (result) {
     case TURTLS_ERROR_NONE:
         puts("handshake succeeded");
         break;
@@ -58,22 +61,22 @@ int main(const int argc, const char **argv)
         fputs("write error\n", stderr);
         exit(EXIT_FAILURE);
         break;
-    case TURTLS_ERROR_RNG_ERROR:
+    case TURTLS_ERROR_TLS:
+        fprintf(stderr, "tls error: %s\n", turtls_stringify_alert(turtls_get_tls_error(tls_conn)));
+        exit(EXIT_FAILURE);
+        break;
+    case TURTLS_ERROR_TLS_PEER:
+        fprintf(
+            stderr, "peer tls error: %s\n", turtls_stringify_alert(turtls_get_tls_error(tls_conn)));
+        exit(EXIT_FAILURE);
+        break;
+
+    case TURTLS_ERROR_RNG:
         fputs("could not generate a secure random number\n", stderr);
         exit(EXIT_FAILURE);
         break;
     case TURTLS_ERROR_PRIV_KEY_IS_ZERO:
         fputs("the generated private key was zero\n", stderr);
-        exit(EXIT_FAILURE);
-        break;
-    case TURTLS_ERROR_RECEIVED_ALERT:
-        /* TODO: stringify the alert */
-        fprintf(stderr, "received alert: %s\n", turtls_stringify_alert(result.received_alert));
-        exit(EXIT_FAILURE);
-        break;
-    case TURTLS_ERROR_SENT_ALERT:
-        /* TODO: stringify the alert */
-        fprintf(stderr, "server error: %s\n", turtls_stringify_alert(result.received_alert));
         exit(EXIT_FAILURE);
         break;
     case TURTLS_ERROR_MISSING_EXTENSIONS:
@@ -82,10 +85,10 @@ int main(const int argc, const char **argv)
         break;
     }
 
-    puts(turtls_app_proto(connection));
+    puts(turtls_app_proto(tls_conn));
 
-    turtls_close(connection);
-    turtls_free(connection);
+    turtls_close(tls_conn);
+    turtls_free(tls_conn);
 }
 
 static ssize_t tcp_send(const void *data, size_t n, const void *ctx)
