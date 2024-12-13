@@ -1,9 +1,6 @@
-#include <errno.h>
-#include <fcntl.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -93,20 +90,12 @@ int main(const int argc, const char **argv)
 
 static ssize_t tcp_send(const void *data, size_t n, const void *ctx)
 {
-    ssize_t bytes_read = send(*(int *) ctx, data, n, 0);
-    if (bytes_read < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)) {
-        bytes_read = 0;
-    }
-    return bytes_read;
+    return send(*(int *) ctx, data, n, 0);
 }
 
 static ssize_t tcp_read(void *buf, size_t n, const void *ctx)
 {
-    ssize_t bytes_read = recv(*(int *) ctx, buf, n, 0);
-    if (bytes_read < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)) {
-        bytes_read = 0;
-    }
-    return bytes_read;
+    return recv(*(int *) ctx, buf, n, 0);
 }
 
 static void tcp_close(const void *ctx) { close(*(int *) ctx); }
