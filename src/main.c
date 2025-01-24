@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,7 +72,7 @@ static int tcp_connect(const char *hostname, const char *port)
     hints.ai_socktype = SOCK_STREAM;
 
     if (getaddrinfo(hostname, port, &hints, &result) != 0) {
-        fprintf(stderr, "could not find hostname: %s\n", hostname);
+        fprintf(stderr, "could not find hostname %s\n", hostname);
         exit(EXIT_FAILURE);
     }
 
@@ -82,7 +84,7 @@ static int tcp_connect(const char *hostname, const char *port)
         }
 
         if (connect(sock, p->ai_addr, p->ai_addrlen) == -1) {
-            perror("could not create a connection");
+            perror("could not connect");
             close(sock);
             continue;
         }
@@ -90,7 +92,7 @@ static int tcp_connect(const char *hostname, const char *port)
         break;
     }
     if (p == NULL) {
-        fprintf(stderr, "could not find an IP address with hostname %s\n", hostname);
+        fprintf(stderr, "could not find hostname %s\n", hostname);
         exit(EXIT_FAILURE);
     }
 
