@@ -1,5 +1,16 @@
 # Pull
 Pull files from the internet.
+This program primarily exists to test [TurTLS](https://github.com/lukasvrenner/turtls).
+
+## Usage
+To use `pull`, you need an Internet connection.
+Run the following command:
+```bash
+pull <domain_name>
+```
+Where <domain_name> represents the domain name of the server you're trying to connect to.
+
+In the future, `pull` will ideally take a URL as input instead.
 
 ## Dependencies
 ### Build dependencies
@@ -7,8 +18,8 @@ Pull files from the internet.
 - [meson](https://github.com/mesonbuild/meson)
 
 ### Runtime dependencies
-- libc
-- [turtls](https://github.com/lukasvrenner/turtls)
+- libc (POSIX-compatible)
+- [TurTLS](https://github.com/lukasvrenner/turtls)
 
 ## Building
 ### Debug mode
