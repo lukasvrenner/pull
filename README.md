@@ -4,32 +4,27 @@ Pull files from the internet.
 ## Dependencies
 ### Build dependencies
 - A C compiler
-- [meson](https://github.com/mesonbuild/meson)
+- Make
 
 ### Runtime dependencies
 - libc
 - [turtls](https://github.com/lukasvrenner/turtls)
 
 ## Building
+Make sure `turtls` is in a directory parallel to this, e.g. `../turtls`.
+If not, `Makefile` will have to be modified to find the library.
+
 ### Debug mode
 ```bash
-meson setup build
-meson compile -C build
+make
 ```
+The executable will be generated in `./build`.
 
 ### Release mode
 ```bash
-meson setup build --buildtype release
-meson compile -C build
+make release
 ```
-
-## Installing
-Follow the build instructions, then run
-```bash
-meson install -C build
-```
-This will install `pull` to `/usr/local/bin/`. To install to a different path,
-set the `DESTDIR` environment variable or add the `--destdir` flag.
+The executable will be generated in `./buildrel`.
 
 ## License
 Copyright 2024 Lukas Renner
