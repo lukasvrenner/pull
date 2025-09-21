@@ -10,10 +10,10 @@ LDFLAGS_RELEASE = $(LDFLAGS) -L$(TURTLS)/target/release -Wl,-rpath=$(TURTLS)/tar
 
 SRC = src/main.c
 
-OBJ_DEBUG = $(SRC:%.c=build/%.o)
+OBJ_DEBUG = build/$(SRC:.c=.o)
 DEP_DEBUG = $(OBJ_DEBUG:.o=.d)
 
-OBJ_RELEASE = $(SRC:%.c=buildrel/%.o)
+OBJ_RELEASE = buildrel/$(SRC:.c=.o)
 DEP_RELEASE = $(OBJ_RELEASE:.o=.d)
 
 NAME = pull
