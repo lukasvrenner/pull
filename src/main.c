@@ -119,8 +119,9 @@ static int tls_connect(struct TurtlsConn *tls_conn, const char *hostname)
             fputs("write error\n", stderr);
             break;
         case TURTLS_ERROR_TLS:
-            fprintf(
-                stderr, "tls error: %s\n", turtls_stringify_alert(turtls_get_tls_error(tls_conn)));
+            fprintf(stderr,
+                    "tls error: %s\n",
+                    turtls_stringify_alert(turtls_get_tls_error(tls_conn)));
             break;
         case TURTLS_ERROR_TLS_PEER:
             fprintf(stderr,
