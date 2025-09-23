@@ -53,7 +53,7 @@ buildrel/src:
 -include $(DEP_RELEASE)
 
 clean:
-	rm -rf build/
-	rm -rf buildrel/
+	-rm -rf build/
+	-rm -rf buildrel/
 
 .PHONY: all debug release clean
