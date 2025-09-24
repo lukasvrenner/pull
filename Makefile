@@ -13,7 +13,7 @@ SRC = src/main.c
 OBJ_DEBUG = $(SRC:%.c=build/%.o)
 DEP_DEBUG = $(OBJ_DEBUG:.o=.d)
 
-OBJ_RELEASE = $(SRC:%.c=buildrel/.o)
+OBJ_RELEASE = $(SRC:%.c=buildrel/%.o)
 DEP_RELEASE = $(OBJ_RELEASE:.o=.d)
 
 NAME = pull
