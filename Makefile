@@ -1,6 +1,6 @@
 TURTLS = ../turtls
 
-CFLAGS = -std=c17 -Wall -Wextra -Wpedantic -I$(TURTLS)/include
+CFLAGS = -std=c17 -Wall -Wextra -Wpedantic -Werror -I$(TURTLS)/include
 CFLAGS_DEBUG = $(CFLAGS) -g -O0
 CFLAGS_RELEASE = $(CFLAGS) -O3
 
