@@ -41,7 +41,7 @@ int main(const int argc, const char **argv)
 
     struct TurtlsConn *tls_conn = turtls_new(io);
 
-    if (tls_connect(tls_conn, hostname) < 1) {
+    if (tls_connect(tls_conn, hostname) < 0) {
         turtls_free(tls_conn);
         exit(EXIT_FAILURE);
     }
@@ -140,5 +140,5 @@ static int tls_connect(struct TurtlsConn *tls_conn, const char *hostname)
         }
         return -1;
     }
-    return 1;
+    return 0;
 }
