@@ -1,0 +1,30 @@
+--blank-lines-after-declarations
+--blank-lines-after-procedures
+--blank-lines-before-block-comments
+--braces-after-func-def-line
+--braces-on-if-line
+--braces-on-struct-decl-line
+--break-before-boolean-operator
+--case-indentation 0
+--comment-line-length 100
+--cuddle-do-while
+--cuddle-else
+--dont-break-function-decl-args
+--dont-break-procedure-type
+--indent-label -4
+--indent-level 4
+--line-length 100
+--no-blank-lines-after-commas
+--no-space-after-function-call-names
+--no-space-after-parentheses
+--no-tabs
+--space-after-cast
+--space-after-for
+--space-after-if
+--space-after-while
+--spaces-around-initializers
+--start-left-side-of-comments
+--swallow-optional-blank-lines
+--fix-nested-comments
+--comment-indentation 0
+--pointer-align-right

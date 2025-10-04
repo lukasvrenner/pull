@@ -1,3 +1,5 @@
+CC = cc
+
 TURTLS = ../turtls
 
 CFLAGS = -std=c17 -Wall -Wextra -Wpedantic -Werror -I$(TURTLS)/include
@@ -26,10 +28,10 @@ all: debug
 debug: build/$(NAME)
 
 build/$(NAME): $(OBJ_DEBUG)
-	cc $(OBJ_DEBUG) $(LDFLAGS_DEBUG) -o build/$(NAME)
+	$(CC) $(OBJ_DEBUG) $(LDFLAGS_DEBUG) -o build/$(NAME)
 
 build/src/%.o: src/%.c | build/src
-	cc $(CFLAGS_DEBUG) -MMD -MP -c $< -o $@
+	$(CC) $(CFLAGS_DEBUG) -MMD -MP -c $< -o $@
 
 build/src:
 	mkdir -p $@
@@ -42,10 +44,10 @@ build/src:
 release: buildrel/$(NAME)
 
 buildrel/$(NAME): $(OBJ_RELEASE)
-	cc $(OBJ_RELEASE) $(LDFLAGS_RELEASE) -o buildrel/$(NAME)
+	$(CC) $(OBJ_RELEASE) $(LDFLAGS_RELEASE) -o buildrel/$(NAME)
 
 buildrel/src/%.o: src/%.c | buildrel/src
-	cc $(CFLAGS_RELEASE) -MMD -MP -c $< -o $@
+	$(CC) $(CFLAGS_RELEASE) -MMD -MP -c $< -o $@
 
 buildrel/src:
 	mkdir -p $@
@@ -53,7 +55,6 @@ buildrel/src:
 -include $(DEP_RELEASE)
 
 clean:
-	-rm -rf build/
-	-rm -rf buildrel/
+	-rm -rf build/ buildrel/
 
 .PHONY: all debug release clean

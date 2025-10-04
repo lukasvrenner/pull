@@ -62,7 +62,10 @@ static ssize_t tcp_read(void *buf, size_t n, const void *ctx)
     return recv(*(int *) ctx, buf, n, 0);
 }
 
-static void tcp_close(const void *ctx) { close(*(int *) ctx); }
+static void tcp_close(const void *ctx)
+{
+    close(*(int *) ctx);
+}
 
 static int tcp_connect(const char *hostname, const char *port)
 {
@@ -120,13 +123,11 @@ static int tls_connect(struct TurtlsConn *tls_conn, const char *hostname)
             break;
         case TURTLS_ERROR_TLS:
             fprintf(stderr,
-                    "tls error: %s\n",
-                    turtls_stringify_alert(turtls_get_tls_error(tls_conn)));
+                    "tls error: %s\n", turtls_stringify_alert(turtls_get_tls_error(tls_conn)));
             break;
         case TURTLS_ERROR_TLS_PEER:
             fprintf(stderr,
-                    "peer tls error: %s\n",
-                    turtls_stringify_alert(turtls_get_tls_error(tls_conn)));
+                    "peer tls error: %s\n", turtls_stringify_alert(turtls_get_tls_error(tls_conn)));
             break;
         case TURTLS_ERROR_RNG:
             fputs("could not generate a secure random number\n", stderr);
