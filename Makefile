@@ -1,6 +1,6 @@
 CC = cc
 
-TURTLS = ../turtls
+TURTLS = $$HOME/projects/turtls
 
 CFLAGS = -std=c17 -Wall -Wextra -Wpedantic -Werror -I$(TURTLS)/include
 CFLAGS_DEBUG = $(CFLAGS) -g -O0

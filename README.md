@@ -1,6 +1,11 @@
 # Pull
 Pull files from the internet.
 
+## Usage
+```bash
+pull google.com
+```
+
 ## Dependencies
 ### Build dependencies
 - A C compiler
@@ -11,8 +16,13 @@ Pull files from the internet.
 - [turtls](https://github.com/lukasvrenner/turtls)
 
 ## Building
-Make sure `turtls` is in a directory parallel to this, e.g. `../turtls`.
-If not, `Makefile` will have to be modified to find the library.
+By default, TurTLS's root directory must be in the directory `$HOME/projects/turtls`.
+To change this, set the variable TURTLS:
+```bash
+make TURTLS=<path_to_turtls>
+```
+The library `libturtls.so` must be in TURTLS/target/debug or TURTLS/target/release.
+The TurTLS header files must be in TURTLS/include.
 
 ### Debug mode
 ```bash
